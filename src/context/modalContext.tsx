@@ -5,14 +5,20 @@ type ModalContextType = {
   isOpenInputDocument: boolean
   isOpenEditClient: boolean
   isOpenEditDocument: boolean
+  isOpenDeleteClient: boolean
+  isOpenDeleteDocument: boolean
   openModalInputClient: () => void
   openModalInputDocument: () => void
   openModalEditClient: () => void
   openModalEditDocument: () => void
+  openModalDeleteClient: () => void
+  openModalDeleteDocument: () => void
   closeModalInputClient: () => void
   closeModalInputDocument: () => void
   closeModalEditClient: () => void
   closeModalEditDocument: () => void
+  closeModalDeleteClient: () => void
+  closeModalDeleteDocument: () => void
 }
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined)
@@ -22,6 +28,8 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
   const [isOpenInputDocument, setIsOpenInputDocument] = useState(false);
   const [isOpenEditClient, setIsOpenEditClient] = useState(false);
   const [isOpenEditDocument, setIsOpenEditDocument] = useState(false);
+  const [isOpenDeleteClient, setIsOpenDeleteClient] = useState(false);
+  const [isOpenDeleteDocument, setIsOpenDeleteDocument] = useState(false);
 
   return (
     <ModalContext.Provider
@@ -30,6 +38,8 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
         isOpenInputDocument,
         isOpenEditClient,
         isOpenEditDocument,
+        isOpenDeleteClient,
+        isOpenDeleteDocument,
         openModalInputClient: () => setIsOpenInputClient(true),
         closeModalInputClient: () => setIsOpenInputClient(false),
         openModalInputDocument: () => setIsOpenInputDocument(true),
@@ -37,7 +47,11 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
         openModalEditClient: () => setIsOpenEditClient(true),
         closeModalEditClient: () => setIsOpenEditClient(false),
         openModalEditDocument: () => setIsOpenEditDocument(true),
-        closeModalEditDocument: () => setIsOpenEditDocument(false)
+        closeModalEditDocument: () => setIsOpenEditDocument(false),
+        openModalDeleteClient: () => setIsOpenDeleteClient(true),
+        closeModalDeleteClient: () => setIsOpenDeleteClient(false),
+        openModalDeleteDocument: () => setIsOpenDeleteDocument(true),
+        closeModalDeleteDocument: () => setIsOpenDeleteDocument(false)
       }}
     >
       {children}

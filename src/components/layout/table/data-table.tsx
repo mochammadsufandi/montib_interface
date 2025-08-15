@@ -57,7 +57,7 @@ export function DataTable<TData, TValue>({
   })
 
   const router = useRouter();
-  const {openModalEditClient} = useModal();
+  const {openModalEditClient, openModalDeleteClient} = useModal();
   const {setSelectedRow} = useEditClient();
 
   return (
@@ -110,7 +110,12 @@ export function DataTable<TData, TValue>({
                         >
                           <Image src={"/editIcon.svg"} alt="edit" width={25} height={25}></Image>
                         </Button>
-                        <Button className="bg-white" variant={"outline"}>
+                        <Button className="bg-white" variant={"outline"}
+                          onClick={() => {
+                            openModalDeleteClient()
+                            setSelectedRow(row.original as ClientDataType)
+                          }}
+                        >
                           <Image src={"/deleteIcon.svg"} alt="delete" width={25} height={25}></Image>
                         </Button>
                       </>

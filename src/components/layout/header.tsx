@@ -1,10 +1,31 @@
+"use client"
+
+import Image from "next/image";
 import { SidebarTrigger } from "../ui/sidebar";
 
-const Header = () => {
+const Header = ({query} : {query : string}) => {
+
     return (
-        <div className="border-black border-r-[3px] border-t-[3px] border-b-[3px] h-[125px] w-full fixed bg-white z-100">
-            <SidebarTrigger className="w-[4rem] h-[4rem]"/>
-            <h1 className="text-[1.2rem] mx-[2rem]">Dashboard</h1>
+        <div className="flex flex-row justify-between items-center pr-[2rem] bg-blue-300 fixed top-0 w-full border-black border-r-[3px] border-t-[3px] border-b-[3px] h-[125px] z-50">
+            <div>
+                <SidebarTrigger className="w-[4rem] h-[4rem]"/>
+                <h1 className="text-[1.2rem] mx-[2rem]">{query}</h1>
+            </div>
+            <div className="flex flex-row gap-[1rem]">
+                <Image
+                    src={"/Komdigi.svg"}
+                    alt="Logo Komdigi"
+                    width={90}
+                    height={80}
+                />
+                <Image
+                    src={"/DJID.svg"}
+                    className="rounded-md"
+                    alt="Logo DJID"
+                    width={100}
+                    height={100}
+                />
+            </div>
         </div>
     )
 }

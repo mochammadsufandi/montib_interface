@@ -1,6 +1,7 @@
 import Image from "next/image"
 import { Dropdown } from "../ui/dropdownManual"
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar"
+import { Sidebar, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar"
+import { useModal } from "@/context/modalContext"
 
 const items = [
     {
@@ -18,15 +19,16 @@ const items = [
 const items2 = [
      {
         title : "Input Document",
-        url : "#",
+        url : "",
         icon : ""
     },
 ]
 
 export const AppSideBar = () => {
+    const {openModalInputClient, openModalInputDocument} = useModal();
     return (
-        <Sidebar>
-            <div className="flex justify-center items-center gap-3 border-black border-[3px] h-[9rem]">
+        <Sidebar className="w-[25rem] ">
+            <div className="flex justify-center items-center gap-3 w border-black border-[3px] h-[9rem] bg-gray-300">
                 <Image
                     src="/Frequency.svg"
                     alt="logo-frekuensi"
@@ -38,16 +40,22 @@ export const AppSideBar = () => {
             </div>
 
             <SidebarGroup/>
-                <div className="border-l-[3px] border-r-[3px] border-b-[3px] border-black h-full">
+                <div className="border-l-[3px] border-r-[3px] border-b-[3px] border-black h-full bg-gray-300">
                     <SidebarContent>
                         <SidebarMenu className="mt-[2rem]">
                             {
                                 items.map((item) => (
                                     <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton asChild>
-                                            <a href={item.url} className="py-[1.5rem]">
-                                                <span className="font-medium text-[20px] ml-[1rem]">{item.title}</span>
-                                            </a>
+                                        <SidebarMenuButton asChild> 
+                                            {item.title === "Input Client" ? (
+                                                 <button className="py-[1.5rem]" onClick={openModalInputClient}>
+                                                    <span className="font-medium text-[20px] ml-[1rem] ">{item.title}</span>
+                                                </button>
+                                            ) : (
+                                                <a href={item.url} className="py-[1.5rem]">
+                                                    <span className="font-medium text-[20px] ml-[1rem]">{item.title}</span>
+                                                </a>
+                                            )}
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
                                 ))
@@ -57,9 +65,9 @@ export const AppSideBar = () => {
                                 items2.map((item) => (
                                     <SidebarMenuItem key={item.title}>
                                         <SidebarMenuButton asChild>
-                                            <a href={item.url} className="pb-[1.5rem]">
+                                            <button className="py-[1.5rem]" onClick={openModalInputDocument}>
                                                 <span className="font-medium text-[20px] ml-[1rem] ">{item.title}</span>
-                                            </a>
+                                            </button>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
                                 ))

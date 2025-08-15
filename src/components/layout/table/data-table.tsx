@@ -21,6 +21,11 @@ import {
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { useState } from "react"
+import { ClientDataType } from "@/pages/service"
+import { useRouter } from "next/router"
+import { useModal } from "@/context/modalContext"
+import { useEditClient } from "@/context/clientContext"
+
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -50,6 +55,10 @@ export function DataTable<TData, TValue>({
       pagination
     }
   })
+
+  const router = useRouter();
+  const {openModalEditClient} = useModal();
+  const {setSelectedRow} = useEditClient();
 
   return (
     <div className="overflow-hidden rounded-md border mt-[3rem] mx-[2rem]">
@@ -83,18 +92,27 @@ export function DataTable<TData, TValue>({
                   <TableCell key={cell.id} className="w-[30rem] max-w-[30rem] whitespace-normal break-words">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     {cell.column.id === "detail" ? (
-                      <Button className="bg-white" variant={"outline"}>
+                      <Button className="bg-white" variant={"outline"}
+                        onClick={() => {
+                          console.log(row.original)
+                            router.push(`/${(row.original as ClientDataType).nama_perusahaan}`)
+                        }}
+                      >
                         <Image src={"/detailsIcon.svg"} alt="detail" width={25} height={25}></Image>
                       </Button>
                     ) : cell.column.id === "action"? (
                       <>
-                        <Button className="bg-white max-w-fit max-h-fit" variant={"outline"}>
+                        <Button className="bg-white max-w-fit max-h-fit" variant={"outline"}
+                          onClick={() => {
+                            openModalEditClient()
+                            setSelectedRow(row.original as ClientDataType)
+                          }}
+                        >
                           <Image src={"/editIcon.svg"} alt="edit" width={25} height={25}></Image>
                         </Button>
                         <Button className="bg-white" variant={"outline"}>
                           <Image src={"/deleteIcon.svg"} alt="delete" width={25} height={25}></Image>
                         </Button>
-                        
                       </>
                     ) : (
                       ""

@@ -7,25 +7,27 @@ import { ReactNode } from "react"
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Document = {
-  id: string
-  nama_perusahaan : string,
-  alamat : string,
-  jumlah_berkas : number,
-  tanggal_terakhir_berkas : Date,
-  detail : ReactNode,
-  action : ReactNode
+    id: string
+    nomor_surat : string
+    nama_dokumen : string
+    jenis_dokumen : string
+    url : string
+    tanggal_dibuat : Date
+    tanggal_diupload : Date
+    clientId : number
+    action : ReactNode
 }
 
-export const columns: ColumnDef<Document>[] = [
+export const DocumentColumns: ColumnDef<Document>[] = [
   {
-    accessorKey: "nama_perusahaan",
+    accessorKey: "nama_dokumen",
     header: ({ column }) => {
       return (
         <div className="flex flex-row items-center">
           <button
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Nama Perusahaan
+            Nama Dokumen
           </button>
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </div>
@@ -33,14 +35,14 @@ export const columns: ColumnDef<Document>[] = [
     },
   },
   {
-    accessorKey: "alamat",
+    accessorKey: "nomor_surat",
     header: ({ column }) => {
       return (
         <div className="flex flex-row items-center">
           <button
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Alamat
+            Nomor Surat
           </button>
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </div>
@@ -48,14 +50,14 @@ export const columns: ColumnDef<Document>[] = [
     },
   },
   {
-    accessorKey: "jumlah_berkas",
+    accessorKey: "jenis_dokumen",
     header: ({ column }) => {
       return (
         <div className="flex flex-row items-center">
           <button
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Jumlah Berkas
+            Jenis Dokumen
           </button>
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </div>
@@ -63,14 +65,14 @@ export const columns: ColumnDef<Document>[] = [
     },
   },
   {
-    accessorKey: "tanggal_terakhir_berkas",
+    accessorKey: "tanggal_dibuat",
     header: ({ column }) => {
       return (
         <div className="flex flex-row items-center">
           <button
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Tanggal Terakhir Berkas
+           Tanggal Dibuat
           </button>
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </div>
@@ -78,13 +80,23 @@ export const columns: ColumnDef<Document>[] = [
     },
   },
   {
-    header: "Detail",
-    accessorKey : "detail",
-    cell : ({row}) => row.original.detail
+    accessorKey: "tanggal_diupload",
+    header: ({ column }) => {
+      return (
+        <div className="flex flex-row items-center">
+          <button
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+           Tanggal Upload
+          </button>
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </div>
+      )
+    },
   },
   {
     header: "Action",
     accessorKey : "action",
-    cell : ({row}) => row.original.detail
+    cell : ({row}) => row.original.action
   },
 ]

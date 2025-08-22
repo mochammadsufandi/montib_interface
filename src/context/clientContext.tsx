@@ -5,17 +5,20 @@ import {ClientDataType} from "@/pages/service"
 
 
 type ClientContextType = {
-  selectedRow: ClientDataType | null;
-  setSelectedRow: (row: ClientDataType | null) => void;
+  selectedRowClient: ClientDataType | null;
+  setSelectedRowClient: (row: ClientDataType | null) => void;
+  service : string,
+  setService : (params : string) => void;
 };
 
 const ClientContext = createContext<ClientContextType | undefined>(undefined);
 
 export const ClientProvider = ({ children }: { children: React.ReactNode }) => {
-  const [selectedRow, setSelectedRow] = useState<ClientDataType | null>(null);
+  const [selectedRowClient, setSelectedRowClient] = useState<ClientDataType | null>(null);
+  const [service, setService] = useState<string>("");
 
   return (
-    <ClientContext.Provider value={{ selectedRow, setSelectedRow }}>
+    <ClientContext.Provider value={{ selectedRowClient, setSelectedRowClient, service, setService }}>
       {children}
     </ClientContext.Provider>
   );

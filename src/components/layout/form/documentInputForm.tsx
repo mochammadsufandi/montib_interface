@@ -80,7 +80,7 @@ export function DocumentInputForm() {
   function onSubmit(values: z.infer<typeof documentFormSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    const data : any = {
+    const data : DocumentInput = {
       ...values,
       clientId : +values.clientId,
       nomor_surat : `B-${values.nomor_surat}/Balmon.15/SP.03.${values.bagian_pengendalian}${tanggalSurat}`,
@@ -109,7 +109,7 @@ export function DocumentInputForm() {
         <div className="fixed inset-0 flex items-center justify-center z-50 overflow-y-scroll" style={{ backgroundColor: "rgba(0,0,0,0.15)" }}
           onClick={closeModalInputDocument}
         >
-          <div className="bg-gray-500 p-[2rem] rounded-md w-[40%] shadow-lg mt-[6rem]"
+          <div className="bg-gray-400 p-[2rem] rounded-md w-[40%] shadow-lg mt-[6rem]"
             onClick={(e : React.MouseEvent<HTMLDivElement>) => e.stopPropagation() }
           >
             <div className="flex flex-row justify-between pb-[1rem]">
@@ -134,7 +134,7 @@ export function DocumentInputForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Input placeholder="shadcn" {...field} type="number" min={0} className="w-[5rem]"/>
+                          <Input placeholder="545a" {...field}  className="w-[5rem]"/>
                         </FormControl>
                       </FormItem>
                     )}
@@ -174,7 +174,7 @@ export function DocumentInputForm() {
                     <FormItem>
                       <FormLabel className="text-[1rem]">Nama Dokumen</FormLabel>
                       <FormControl>
-                        <Input className="text-black" placeholder="shadcn" {...field} />
+                        <Input className="text-black" placeholder="Berita Acara Klarifikasi Pemenuhan Peraturan" {...field} />
                       </FormControl>
                       <FormMessage className="text-white" />
                     </FormItem>
@@ -215,7 +215,7 @@ export function DocumentInputForm() {
                     <FormItem>
                       <FormLabel className="text-[1rem]">URL</FormLabel>
                       <FormControl>
-                        <Input className="text-black" placeholder="shadcn" {...field} />
+                        <Input className="text-black" placeholder="https://balmonjambi/folder/dokumen-penertiban" {...field} />
                       </FormControl>
                       <FormMessage className="text-white" />
                     </FormItem>
@@ -236,14 +236,13 @@ export function DocumentInputForm() {
                                     aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
                         >
                           <option>Select Option</option>
-                          <option>Broadcast</option>
-                          <option>Aeronautical</option>
-                          <option>Fixed Service</option>
-                          <option>Land Mobile (Pr)</option>
-                          <option>Land Mobile (Pu)</option>
+                          <option>Standard</option>
                           <option>Maritime</option>
-                          <option>Satellite</option>
-                          <option>Other Service</option>
+                          <option>FM/AM/DVB-T</option>
+                          <option>Amatir</option>
+                          <option>Trunking</option>
+                          <option>Point to Point</option>
+                          <option>Free to Air/Unlicensed</option>
                         </select>
                       </FormControl>
                       <FormMessage className="text-white"/>

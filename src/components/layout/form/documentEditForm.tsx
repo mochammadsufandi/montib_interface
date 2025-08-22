@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { useModal } from "@/context/modalContext"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
+import { useEditDocument } from "@/context/documentContext"
 
 type DocumentInput = {
   nomor_surat : string,
@@ -39,7 +40,7 @@ const documentFormSchema = z.object({
   url: z.string(),
   dinas_frekuensi: z.string(),
   tanggal_dibuat: z.string(),
-  clientId : z.string()
+  clientId : z.number()
 })
 
 export function DocumentEditForm() {
@@ -51,11 +52,11 @@ export function DocumentEditForm() {
       nama_dokumen: "",
       jenis_dokumen: "",
       url: "",
-      tanggal_dibuat: ""
     },
   })
 
   const {isOpenEditDocument, closeModalEditDocument} = useModal();
+  const {selectedRowDocument} = useEditDocument()
   const [tanggalSurat, setTanggalSurat] = useState<string>("");
   const clients = [
     {
@@ -95,12 +96,23 @@ export function DocumentEditForm() {
     } else {
       document.body.style.overflow = "auto"; // aktifkan scroll
     }
-    console.log(isOpenEditDocument)
+    if(selectedRowDocument) {
+      console.log(selectedRowDocument.tanggal_dibuat.toLocaleDateString())
+      // const
+      form.reset({
+        nomor_surat : selectedRowDocument.nomor_surat.split("/")[0].split("-")[1],
+        bagian_pengendalian : selectedRowDocument.nomor_surat.split("/")[2].split(".")[2],
+        nama_dokumen : selectedRowDocument.nama_dokumen,
+        jenis_dokumen : selectedRowDocument.jenis_dokumen,
+        clientId : +selectedRowDocument.clientId,
+        tanggal_dibuat : selectedRowDocument.tanggal_dibuat.toISOString().split(":")[0]
+      })
+    }
 
     return () => {
       document.body.style.overflow = "auto"; // jaga-jaga kalau komponen unmount
     };
-  }, [isOpenEditDocument]);
+  }, [isOpenEditDocument,selectedRowDocument,form]);
 
   if (!isOpenEditDocument) return null;
 
@@ -109,11 +121,11 @@ export function DocumentEditForm() {
         <div className="fixed inset-0 flex items-center justify-center z-50 overflow-y-scroll" style={{ backgroundColor: "rgba(0,0,0,0.15)" }}
           onClick={closeModalEditDocument}
         >
-          <div className="bg-gray-500 p-[2rem] rounded-md w-[40%] shadow-lg mt-[6rem]"
+          <div className="bg-gray-400 p-[2rem] rounded-md w-[40%] shadow-lg mt-[6rem]"
             onClick={(e : React.MouseEvent<HTMLDivElement>) => e.stopPropagation() }
           >
             <div className="flex flex-row justify-between pb-[1rem]">
-              <h1 className="text-[1.5rem] font-bold">Input Document</h1>
+              <h1 className="text-[1.5rem] font-bold">Edit Document</h1>
               <button onClick={closeModalEditDocument} className="w-fit">
                 <Image
                   src={"/closeIcon.svg"}
@@ -134,7 +146,7 @@ export function DocumentEditForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Input placeholder="shadcn" {...field} type="number" min={0} className="w-[5rem]"/>
+                          <Input placeholder="545a" {...field} type="number" min={0} className="w-[5rem]"/>
                         </FormControl>
                       </FormItem>
                     )}
@@ -174,7 +186,7 @@ export function DocumentEditForm() {
                     <FormItem>
                       <FormLabel className="text-[1rem]">Nama Dokumen</FormLabel>
                       <FormControl>
-                        <Input className="text-black" placeholder="shadcn" {...field} />
+                        <Input className="text-black" placeholder="Berita Acara Klarifikasi Pemenuhan Peraturan" {...field} />
                       </FormControl>
                       <FormMessage className="text-white" />
                     </FormItem>
@@ -215,7 +227,7 @@ export function DocumentEditForm() {
                     <FormItem>
                       <FormLabel className="text-[1rem]">URL</FormLabel>
                       <FormControl>
-                        <Input className="text-black" placeholder="shadcn" {...field} />
+                        <Input className="text-black" placeholder="https://balmonjambi/folder/dokumen-penertiban" {...field} />
                       </FormControl>
                       <FormMessage className="text-white" />
                     </FormItem>
@@ -236,14 +248,13 @@ export function DocumentEditForm() {
                                     aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
                         >
                           <option>Select Option</option>
-                          <option>Broadcast</option>
-                          <option>Aeronautical</option>
-                          <option>Fixed Service</option>
-                          <option>Land Mobile (Pr)</option>
-                          <option>Land Mobile (Pu)</option>
+                          <option>Standard</option>
                           <option>Maritime</option>
-                          <option>Satellite</option>
-                          <option>Other Service</option>
+                          <option>FM/AM/DVB-T</option>
+                          <option>Amatir</option>
+                          <option>Trunking</option>
+                          <option>Point to Point</option>
+                          <option>Free to Air/Unlicensed</option>
                         </select>
                       </FormControl>
                       <FormMessage className="text-white"/>

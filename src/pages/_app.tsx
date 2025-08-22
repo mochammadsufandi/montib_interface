@@ -8,7 +8,9 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { ClientProvider } from "@/context/clientContext";
 import { DocumentEditForm } from "@/components/layout/form/documentEditForm";
-import DeleteModal from "@/components/layout/form/deleteModal";
+import { DocumentProvider } from "@/context/documentContext";
+import DeleteModalClient from "@/components/layout/form/deleteModalClient";
+import DeleteModalDocument from "@/components/layout/form/deleteModalDocument";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -16,15 +18,18 @@ export default function App({ Component, pageProps }: AppProps) {
       <SidebarProvider>
         <ModalProvider>
           <ClientProvider>
-            <AppSideBar/>
-            <main className="w-full">
-              <Component {...pageProps} />
-            </main>
-            <ClientInputForm/>
-            <DocumentInputForm/>
-            <ClientEditForm/>
-            <DocumentEditForm/>
-            <DeleteModal/>
+            <DocumentProvider>
+              <AppSideBar/>
+              <main className="w-full">
+                <Component {...pageProps} />
+              </main>
+              <ClientInputForm/>
+              <DocumentInputForm/>
+              <ClientEditForm/>
+              <DocumentEditForm/>
+              <DeleteModalClient/>  
+              <DeleteModalDocument/>
+            </DocumentProvider>
           </ClientProvider>
         </ModalProvider>
       </SidebarProvider>

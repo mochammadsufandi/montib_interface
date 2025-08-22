@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { useModal } from "@/context/modalContext"
 import Image from "next/image"
 import { useEffect } from "react"
+import supabase from "@/lib/db"
 
 const clientFormSchema = z.object({
   nama_client: z.string().min(2, {
@@ -41,9 +42,13 @@ export function ClientInputForm() {
   const {isOpenInputClient, closeModalInputClient} = useModal();
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof clientFormSchema>) {
+  async function onSubmit(values: z.infer<typeof clientFormSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
+    const {error} = await supabase.from("Client").insert({
+      ...values
+    })
+    if(error) console.log(error);
     console.log(values)
   }
 
@@ -67,7 +72,7 @@ export function ClientInputForm() {
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0,0,0,0.15)" }}
           onClick={closeModalInputClient}
         >
-          <div className="bg-gray-500 p-[2rem] rounded-md w-[30%] shadow-lg"
+          <div className="bg-gray-400 p-[2rem] rounded-md w-[30%] shadow-lg"
             onClick={(e : React.MouseEvent<HTMLDivElement>) => e.stopPropagation() }
           >
             <div className="flex flex-row justify-between pb-[1rem]">
@@ -90,7 +95,7 @@ export function ClientInputForm() {
                     <FormItem>
                       <FormLabel className="text-[1rem]">Nama Client</FormLabel>
                       <FormControl>
-                        <Input placeholder="shadcn" {...field} />
+                        <Input placeholder="Telkomsel, PT" {...field} />
                       </FormControl>
                       <FormMessage className="text-white"/>
                     </FormItem>
@@ -103,7 +108,7 @@ export function ClientInputForm() {
                     <FormItem>
                       <FormLabel className="text-[1rem]">Alamat Client</FormLabel>
                       <FormControl>
-                        <Input className="text-black" placeholder="shadcn" {...field} />
+                        <Input className="text-black" placeholder="Jalan Raya Tangkit No 1, Kabupaten Muaro Jambi" {...field} />
                       </FormControl>
                       <FormMessage className="text-white" />
                     </FormItem>
@@ -124,14 +129,13 @@ export function ClientInputForm() {
                                     aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
                         >
                           <option>Select Option</option>
-                          <option>Broadcast</option>
-                          <option>Aeronautical</option>
-                          <option>Fixed Service</option>
-                          <option>Land Mobile (Pr)</option>
-                          <option>Land Mobile (Pu)</option>
+                          <option>Standard</option>
                           <option>Maritime</option>
-                          <option>Satellite</option>
-                          <option>Other Service</option>
+                          <option>FM/AM/DVB-T</option>
+                          <option>Amatir</option>
+                          <option>Trunking</option>
+                          <option>Point to Point</option>
+                          <option>Free to Air/Unlicensed</option>
                         </select>
                       </FormControl>
                       <FormMessage className="text-white"/>

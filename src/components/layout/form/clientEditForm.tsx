@@ -131,14 +131,13 @@ export function ClientEditForm() {
                                     aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
                         >
                           <option>Select Option</option>
-                          <option>Broadcast</option>
-                          <option>Aeronautical</option>
-                          <option>Fixed Service</option>
-                          <option>Land Mobile (Pr)</option>
-                          <option>Land Mobile (Pu)</option>
+                          <option>Standard</option>
                           <option>Maritime</option>
-                          <option>Satellite</option>
-                          <option>Other Service</option>
+                          <option>FM/AM/DVB-T</option>
+                          <option>Amatir</option>
+                          <option>Trunking</option>
+                          <option>Point to Point</option>
+                          <option>Free to Air/Unlicensed</option>
                         </select>
                       </FormControl>
                       <FormMessage className="text-white"/>

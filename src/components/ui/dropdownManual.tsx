@@ -1,10 +1,10 @@
+import { useEditClient } from "@/context/clientContext";
 import { useRouter } from "next/router"
-import { useState } from "react";
 
 export const Dropdown = () => {
 
     const router = useRouter();
-    const [service, setService] = useState("");
+    const {service,setService} = useEditClient();
     const handleChange = (e : React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value
         setService(value);

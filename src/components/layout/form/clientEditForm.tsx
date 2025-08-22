@@ -38,7 +38,7 @@ export function ClientEditForm() {
   })
 
   const {isOpenEditClient, closeModalEditClient} = useModal();
-  const {selectedRow} = useEditClient();
+  const {selectedRowClient} = useEditClient();
 
   // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof clientFormSchema>) {
@@ -54,18 +54,18 @@ export function ClientEditForm() {
       document.body.style.overflow = "auto"; // aktifkan scroll
     }
 
-    if(selectedRow) {
+    if(selectedRowClient) {
       form.reset({
-        nama_client : selectedRow.nama_perusahaan,
-        alamat_client : selectedRow.alamat,
-        dinas_frekuensi : selectedRow.dinas_frekuensi
+        nama_client : selectedRowClient.nama_client,
+        alamat_client : selectedRowClient.alamat_client,
+        dinas_frekuensi : selectedRowClient.dinas_frekuensi
       })
     }
     return () => {
       document.body.style.overflow = "auto"; // jaga-jaga kalau komponen unmount
     };
     
-  }, [isOpenEditClient, selectedRow, form]);
+  }, [isOpenEditClient, selectedRowClient, form]);
 
   if (!isOpenEditClient) return null;
 
@@ -74,7 +74,7 @@ export function ClientEditForm() {
         <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: "rgba(0,0,0,0.15)" }}
           onClick={closeModalEditClient}
         >
-          <div className="bg-gray-500 p-[2rem] rounded-md w-[30%] shadow-lg"
+          <div className="bg-gray-400 p-[2rem] rounded-md w-[30%] shadow-lg"
             onClick={(e : React.MouseEvent<HTMLDivElement>) => e.stopPropagation() }
           >
             <div className="flex flex-row justify-between pb-[1rem]">
@@ -97,7 +97,7 @@ export function ClientEditForm() {
                     <FormItem>
                       <FormLabel className="text-[1rem]">Nama Client</FormLabel>
                       <FormControl>
-                        <Input placeholder="shadcn" {...field} />
+                        <Input placeholder="Telkomsel, PT" {...field} />
                       </FormControl>
                       <FormMessage className="text-white"/>
                     </FormItem>
@@ -110,7 +110,7 @@ export function ClientEditForm() {
                     <FormItem>
                       <FormLabel className="text-[1rem]">Alamat Client</FormLabel>
                       <FormControl>
-                        <Input className="text-black" placeholder="shadcn" {...field} />
+                        <Input className="text-black" placeholder="Jalan Raya Tangkit No 1, Kabupaten Muaro Jambi" {...field} />
                       </FormControl>
                       <FormMessage className="text-white" />
                     </FormItem>

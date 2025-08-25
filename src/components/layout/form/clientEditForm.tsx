@@ -58,7 +58,6 @@ export function ClientEditForm() {
       setMessage(`edit client ${selectedRowClient?.nama_client} berhasil`);
       setDuration(2000);
       setType("success");
-      window.dispatchEvent(new Event("ClientUpdated"));
       form.reset({
         nama_client : "",
         alamat_client : "",

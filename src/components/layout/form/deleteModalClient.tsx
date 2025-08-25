@@ -1,11 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { useEditClient } from "@/context/clientContext";
 import { useModal } from "@/context/modalContext";
+import { useToast } from "@/context/toastContext";
+import supabase from "@/lib/db";
 import { useEffect } from "react";
 
 const DeleteModalClient = () => {
     const { isOpenDeleteClient, closeModalDeleteClient} = useModal();
     const {selectedRowClient} = useEditClient();
+    const {setIsOpenToast, setDuration, setMessage, setType} = useToast();
 
       
     useEffect(() => {
@@ -23,6 +26,21 @@ const DeleteModalClient = () => {
     
       if (!isOpenDeleteClient) return null;
     
+      const deleteClient = async(id : string) => {
+        console.log(selectedRowClient?.client_id);
+        const {error} = await supabase.from("Client").delete().eq("id", id);
+        
+        setIsOpenToast()
+        if(error) {
+            setMessage(error.details);
+            setType("error");
+        } else {
+            setMessage(`delete client ${selectedRowClient?.nama_client} berhasil`);
+            setDuration(2000);
+            setType("success");
+        }
+      }
+    
 
     return (
         <>  
@@ -37,7 +55,10 @@ const DeleteModalClient = () => {
                     </h2>
                     <div className="flex flex-row justify-around mt-[3rem]">
                         <Button className="w-[5rem] bg-red-600" variant="destructive"
-                            onClick={closeModalDeleteClient}
+                            onClick={async() => {
+                                deleteClient(selectedRowClient?.client_id as string);
+                                closeModalDeleteClient();
+                            }}
                         >
                             Iya
                         </Button>

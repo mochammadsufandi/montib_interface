@@ -35,25 +35,60 @@ const Service = () => {
             year: "numeric",
         });
     };
-
+    
     useEffect(() => {
         const fetchClient = async() => {
-            const {data, error} = await supabase.from("client_summary")
-            .select("*")
-            .eq("dinas_frekuensi", service)
+        const {data, error} = await supabase.from("client_summary")
+        .select("*")
+        .eq("dinas_frekuensi", service)
 
-            if(error) console.log("error : ", error)
-            else {
-                const formattedData = data.map((item) => ({
-                    ...item,
-                    tanggal_terakhir_berkas : formatDate(item.tanggal_terakhir_berkas)
-                }));
-                setClient(formattedData);
+        if(error) console.log("error : ", error)
+        else {
+            const formattedData = data.map((item) => ({
+                ...item,
+                tanggal_terakhir_berkas : formatDate(item.tanggal_terakhir_berkas)
+            }));
+            setClient(formattedData);
+        }
+        }
+        fetchClient();
+        // Subscribe ke table Client
+        const channel = supabase
+        .channel("table-db-changes")
+        .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "Client" },
+            (payload) => {
+            console.log("Perubahan data:", payload);
+
+        if (payload.eventType === "UPDATE") {
+            // kondisi EDIT
+            if ((payload.new as ClientDataType)?.dinas_frekuensi === service) {
+            fetchClient(); // panggil ulang data dari BE
             }
         }
 
-        fetchClient();
+        if (payload.eventType === "DELETE") {
+            // kondisi DELETE
+            console.log(payload.old.id);
+            setClient((prev) => prev.filter((c) => c.client_id !== payload.old.id));
+            // fetchClient();
+        }
+
+        if (payload.eventType === "INSERT") {
+            // kalau mau handle INSERT juga
+            if ((payload.new as ClientDataType)?.dinas_frekuensi === service) {
+            fetchClient();
+            }
+        }
+        })
+        .subscribe();
+        // Cleanup
+        return () => {
+        supabase.removeChannel(channel);
+        };
     }, [service])
+
 
     const {message,duration,onCloseToast,type} = useToast();
     

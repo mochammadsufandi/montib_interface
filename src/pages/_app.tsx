@@ -11,6 +11,7 @@ import { DocumentEditForm } from "@/components/layout/form/documentEditForm";
 import { DocumentProvider } from "@/context/documentContext";
 import DeleteModalClient from "@/components/layout/form/deleteModalClient";
 import DeleteModalDocument from "@/components/layout/form/deleteModalDocument";
+import { ToastProvider } from "@/context/toastContext";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -19,16 +20,18 @@ export default function App({ Component, pageProps }: AppProps) {
         <ModalProvider>
           <ClientProvider>
             <DocumentProvider>
-              <AppSideBar/>
-              <main className="w-full">
-                <Component {...pageProps} />
-              </main>
-              <ClientInputForm/>
-              <DocumentInputForm/>
-              <ClientEditForm/>
-              <DocumentEditForm/>
-              <DeleteModalClient/>  
-              <DeleteModalDocument/>
+              <ToastProvider>
+                <AppSideBar/>
+                <main className="w-full">
+                  <Component {...pageProps} />
+                </main>
+                <ClientInputForm/>
+                <DocumentInputForm/>
+                <ClientEditForm/>
+                <DocumentEditForm/>
+                <DeleteModalClient/>  
+                <DeleteModalDocument/>
+              </ToastProvider>
             </DocumentProvider>
           </ClientProvider>
         </ModalProvider>

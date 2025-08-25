@@ -7,7 +7,7 @@ import { ReactNode } from "react"
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Client = {
-  id: string
+  client_id: string
   nama_client : string,
   alamat_client : string,
   jumlah_berkas : number,

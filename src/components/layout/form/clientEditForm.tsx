@@ -17,6 +17,8 @@ import { useModal } from "@/context/modalContext"
 import Image from "next/image"
 import { useEffect } from "react"
 import { useEditClient } from "@/context/clientContext"
+import supabase from "@/lib/db"
+import { useToast } from "@/context/toastContext"
 
 const clientFormSchema = z.object({
   nama_client: z.string().min(2, {
@@ -39,12 +41,30 @@ export function ClientEditForm() {
 
   const {isOpenEditClient, closeModalEditClient} = useModal();
   const {selectedRowClient} = useEditClient();
+  const {setIsOpenToast,setDuration,setMessage,setType} = useToast();
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof clientFormSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
+  async function onSubmit(values: z.infer<typeof clientFormSchema>) {
+    const {error} = await supabase.from("Client")
+      .update({...values})
+      .eq("id", selectedRowClient?.client_id ).select("*");
+    setIsOpenToast()
+
+    if(error) {
+      setMessage(error.details);
+      setDuration(2000);
+      setType("error");
+    } else {
+      setMessage(`edit client ${selectedRowClient?.nama_client} berhasil`);
+      setDuration(2000);
+      setType("success");
+      window.dispatchEvent(new Event("ClientUpdated"));
+      form.reset({
+        nama_client : "",
+        alamat_client : "",
+        dinas_frekuensi : ""
+      })
+    }
   }
 
   useEffect(() => {

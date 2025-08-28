@@ -122,6 +122,7 @@ export function DataTable<TData, TValue>({
                       <Button className="bg-white" variant={"outline"}
                         onClick={() => {
                           console.log(row.original)
+                            setSelectedRowClient(row.original as ClientDataType);
                             router.push(`/${(row.original as ClientDataType).nama_client}`)
                         }}
                       >

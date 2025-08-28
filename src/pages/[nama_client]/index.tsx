@@ -3,187 +3,67 @@
 import Header from "@/components/layout/header";
 import { DataTable } from "@/components/layout/table/data-table";
 import { DocumentColumns } from "@/components/layout/table/documentColumns";
+import { useEditClient } from "@/context/clientContext";
+import supabase from "@/lib/db";
 import { useRouter } from "next/router"
+import { useEffect, useState } from "react";
 
 export type DocumentDataType = {
-    id: string
+    document_id: string
     nomor_surat : string
     nama_dokumen : string
     jenis_dokumen : string
     url : string
     tanggal_dibuat : Date
     tanggal_diupload : Date
-    clientId : number,
+    dinas_frekuensi : string,
+    clientId : string,
     action : string
 }
 
 const ServiceDetail = () => {
     const router = useRouter();
     const {nama_client} = router.query;
+    const [dokumen, setDokumen] = useState<DocumentDataType[]>([]);
+    const {selectedRowClient} = useEditClient()
 
-    const data = [
-        {
-            id: "785231",
-            nomor_surat : "B-543/Balmon.15/SP.03.03/08/2025",
-            nama_dokumen : "Surat Teguran PT Telkom Indonesia",
-            jenis_dokumen : "Surat Teguran",
-            url : "https://cloudns.go.id/surat-teguran-telkom",
-            tanggal_dibuat : new Date("2025-8-5"),
-            tanggal_diupload : new Date("2025-8-5"),
-            clientId : 1,
-            action : ""
-        },
-        {
-            id: "775231",
-            nomor_surat : "B-544/Balmon.15/SP.03.03/08/2025",
-            nama_dokumen : "BA Klarifikasi Kesanggupan Pemenuhan Peraturan Perundang - Undangan PT Telkom Indonesia",
-            jenis_dokumen : "BA Klarifikasi Pemenuhan PP",
-            url : "https://cloudns.go.id/surat-teguran-telkom",
-            tanggal_dibuat : new Date("2025-8-5"),
-            tanggal_diupload : new Date("2025-8-5"),
-            clientId : 1,
-            action : ""
-        },
-        {
-            id: "765231",
-            nomor_surat : "B-545/Balmon.15/SP.03.03/08/2025",
-            nama_dokumen : "BA Pengamanan APT PT Telkom Indonesia",
-            jenis_dokumen : "BA Pengamanan APT",
-            url : "https://cloudns.go.id/surat-teguran-telkom",
-            tanggal_dibuat : new Date("2025-8-5"),
-            tanggal_diupload : new Date("2025-8-5"),
-            clientId : 1,
-            action : ""
-        },
-        {
-            id: "765231",
-            nomor_surat : "B-545/Balmon.15/SP.03.03/08/2025",
-            nama_dokumen : "BA Pengamanan APT PT Telkom Indonesia",
-            jenis_dokumen : "BA Pengamanan APT",
-            url : "https://cloudns.go.id/surat-teguran-telkom",
-            tanggal_dibuat : new Date("2025-8-5"),
-            tanggal_diupload : new Date("2025-8-5"),
-            clientId : 1,
-            action : ""
-        },
-        {
-            id: "765231",
-            nomor_surat : "B-545/Balmon.15/SP.03.03/08/2025",
-            nama_dokumen : "BA Pengamanan APT PT Telkom Indonesia",
-            jenis_dokumen : "BA Pengamanan APT",
-            url : "https://cloudns.go.id/surat-teguran-telkom",
-            tanggal_dibuat : new Date("2025-8-5"),
-            tanggal_diupload : new Date("2025-8-5"),
-            clientId : 1,
-            action : ""
-        },
-        {
-            id: "765231",
-            nomor_surat : "B-545/Balmon.15/SP.03.03/08/2025",
-            nama_dokumen : "BA Pengamanan APT PT Telkom Indonesia",
-            jenis_dokumen : "BA Pengamanan APT",
-            url : "https://cloudns.go.id/surat-teguran-telkom",
-            tanggal_dibuat : new Date("2025-8-5"),
-            tanggal_diupload : new Date("2025-8-5"),
-            clientId : 1,
-            action : ""
-        },
-        {
-            id: "765231",
-            nomor_surat : "B-545/Balmon.15/SP.03.03/08/2025",
-            nama_dokumen : "BA Pengamanan APT PT Telkom Indonesia",
-            jenis_dokumen : "BA Pengamanan APT",
-            url : "https://cloudns.go.id/surat-teguran-telkom",
-            tanggal_dibuat : new Date("2025-8-5"),
-            tanggal_diupload : new Date("2025-8-5"),
-            clientId : 1,
-            action : ""
-        },
-        {
-            id: "765231",
-            nomor_surat : "B-545/Balmon.15/SP.03.03/08/2025",
-            nama_dokumen : "BA Pengamanan APT PT Telkom Indonesia",
-            jenis_dokumen : "BA Pengamanan APT",
-            url : "https://cloudns.go.id/surat-teguran-telkom",
-            tanggal_dibuat : new Date("2025-8-5"),
-            tanggal_diupload : new Date("2025-8-5"),
-            clientId : 1,
-            action : ""
-        },
-        {
-            id: "765231",
-            nomor_surat : "B-545/Balmon.15/SP.03.03/08/2025",
-            nama_dokumen : "BA Pengamanan APT PT Telkom Indonesia",
-            jenis_dokumen : "BA Pengamanan APT",
-            url : "https://cloudns.go.id/surat-teguran-telkom",
-            tanggal_dibuat : new Date("2025-8-5"),
-            tanggal_diupload : new Date("2025-8-5"),
-            clientId : 1,
-            action : ""
-        },
-        {
-            id: "765231",
-            nomor_surat : "B-545/Balmon.15/SP.03.03/08/2025",
-            nama_dokumen : "BA Pengamanan APT PT Telkom Indonesia",
-            jenis_dokumen : "BA Pengamanan APT",
-            url : "https://cloudns.go.id/surat-teguran-telkom",
-            tanggal_dibuat : new Date("2025-8-5"),
-            tanggal_diupload : new Date("2025-8-5"),
-            clientId : 1,
-            action : ""
-        },
-        {
-            id: "765231",
-            nomor_surat : "B-545/Balmon.15/SP.03.03/08/2025",
-            nama_dokumen : "BA Pengamanan APT PT Telkom Indonesia",
-            jenis_dokumen : "BA Pengamanan APT",
-            url : "https://cloudns.go.id/surat-teguran-telkom",
-            tanggal_dibuat : new Date("2025-8-5"),
-            tanggal_diupload : new Date("2025-8-5"),
-            clientId : 1,
-            action : ""
-        },
-        {
-            id: "765231",
-            nomor_surat : "B-545/Balmon.15/SP.03.03/08/2025",
-            nama_dokumen : "BA Pengamanan APT PT Telkom Indonesia",
-            jenis_dokumen : "BA Pengamanan APT",
-            url : "https://cloudns.go.id/surat-teguran-telkom",
-            tanggal_dibuat : new Date("2025-8-5"),
-            tanggal_diupload : new Date("2025-8-5"),
-            clientId : 1,
-            action : ""
-        },
-        {
-            id: "765231",
-            nomor_surat : "B-545/Balmon.15/SP.03.03/08/2025",
-            nama_dokumen : "BA Pengamanan APT PT Telkom Indonesia",
-            jenis_dokumen : "BA Pengamanan APT",
-            url : "https://cloudns.go.id/surat-teguran-telkom",
-            tanggal_dibuat : new Date("2025-8-5"),
-            tanggal_diupload : new Date("2025-8-5"),
-            clientId : 1,
-            action : ""
-        },
-        {
-            id: "765231",
-            nomor_surat : "B-545/Balmon.15/SP.03.03/08/2025",
-            nama_dokumen : "BA Pengamanan APT PT Telkom Indonesia",
-            jenis_dokumen : "BA Pengamanan APT",
-            url : "https://cloudns.go.id/surat-teguran-telkom",
-            tanggal_dibuat : new Date("2025-8-5"),
-            tanggal_diupload : new Date("2025-8-5"),
-            clientId : 1,
-            action : ""
-        },        
-    ]
+    const formatDate = (dateString: string | null) => {
+        if (!dateString) return "-"; // kasih placeholder misalnya "-"
+        const date = new Date(dateString);
+        return date.toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        });
+    };
+
+    useEffect(() => {
+        const fetchDocument = async() => {
+            const {data,error} = await supabase.from("documents_summary")
+                .select("*")
+                .eq("clientId", selectedRowClient?.client_id)
+            if(error) {
+                console.log(error);
+            } else {
+                 const formattedData = data.map((item) => ({
+                    ...item,
+                    clientId : (item.clientId as number).toString(),
+                    tanggal_dibuat1 : formatDate(item.tanggal_dibuat),
+                    tanggal_dibuat : new Date(item.tanggal_dibuat),
+                    tanggal_diupload : formatDate(item.created_at)
+                }));
+                setDokumen(formattedData);
+            }
+        }
+        fetchDocument()
+    },[selectedRowClient])
 
     return (
         <div>
             <Header query={nama_client as string}/>
             <div className="mt-[10rem]">
                 <h1>Halaman Service untuk {nama_client}</h1>
-                <DataTable type="document" columns={DocumentColumns} data={data}/>
+                <DataTable type="document" columns={DocumentColumns} data={dokumen}/>
             </div>
         </div>
     )

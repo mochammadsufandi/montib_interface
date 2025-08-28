@@ -16,14 +16,22 @@ import { Input } from "@/components/ui/input"
 import { useModal } from "@/context/modalContext"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
+import supabase from "@/lib/db"
 
 type DocumentInput = {
   nomor_surat : string,
   nama_dokumen : string,
   jenis_dokumen : string,
-  url : string,
+  url? : string,
   tanggal_dibuat : Date,
   clientId : number,
+  file : File
+}
+type ClientType = {
+    id : string,
+    nama_client : string,
+    alamat_client : string,
+    dinas_frekuensi : string,
 }
 
 
@@ -36,10 +44,11 @@ const documentFormSchema = z.object({
     message : "alamat minimal 8 karakter"
   }),
   jenis_dokumen: z.string(),
-  url: z.string(),
   dinas_frekuensi: z.string(),
+  // url : z.string(),
   tanggal_dibuat: z.string(),
-  clientId : z.string()
+  clientId : z.string(),
+  file : z.file()
 })
 
 export function DocumentInputForm() {
@@ -50,34 +59,30 @@ export function DocumentInputForm() {
       bagian_pengendalian:"",
       nama_dokumen: "",
       jenis_dokumen: "",
-      url: "",
       tanggal_dibuat: ""
     },
   })
 
   const {isOpenInputDocument, closeModalInputDocument} = useModal();
   const [tanggalSurat, setTanggalSurat] = useState<string>("");
-  const clients = [
-    {
-      id : 1,
-      nama_client : "Radio Eldity, PT"
-    },
-    {
-      id : 2,
-      nama_client : "Singoedan Media Network, PT"
-    },
-    {
-      id : 3,
-      nama_client : "PT Telekomunikasi Indonesia"
-    },
-    {
-      id : 4,
-      nama_client : "PT XL Smart Telecom Sejahtera"
-    },
-  ]
+  const [clients, setClients] = useState<ClientType[]>([]);
+  const [service, setService] = useState("");
+
+
+  async function uploadFile(file:File) {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `documents/${fileName}`;
+      const {error} = await supabase.storage.from("Document").upload(filePath, file);
+      if(error) {
+        console.log(error);
+        throw error;
+      }
+      return filePath;
+  }
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof documentFormSchema>) {
+  async function onSubmit(values: z.infer<typeof documentFormSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     const data : DocumentInput = {
@@ -86,7 +91,8 @@ export function DocumentInputForm() {
       nomor_surat : `B-${values.nomor_surat}/Balmon.15/SP.03.${values.bagian_pengendalian}${tanggalSurat}`,
       tanggal_dibuat : new Date(values.tanggal_dibuat)
     }
-    console.log(data)
+    const filePath = await uploadFile(data.file);
+    console.log(filePath)
   }
 
   useEffect(() => {
@@ -95,12 +101,21 @@ export function DocumentInputForm() {
     } else {
       document.body.style.overflow = "auto"; // aktifkan scroll
     }
-    console.log(isOpenInputDocument)
 
+    const fetchClient = async() => {
+      const {data,error} = await supabase.from("Client").select("*").eq("dinas_frekuensi", service)
+      if(error) {
+        console.log(error)
+      } else {
+        setClients(data);
+      }
+    }
+    fetchClient();
+    
     return () => {
       document.body.style.overflow = "auto"; // jaga-jaga kalau komponen unmount
     };
-  }, [isOpenInputDocument]);
+  }, [isOpenInputDocument, service]);
 
   if (!isOpenInputDocument) return null;
 
@@ -210,12 +225,21 @@ export function DocumentInputForm() {
                 />
                 <FormField
                   control={form.control}
-                  name="url"
+                  name="file"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[1rem]">URL</FormLabel>
+                      <FormLabel className="text-[1rem]">File</FormLabel>
                       <FormControl>
-                        <Input className="text-black" placeholder="https://balmonjambi/folder/dokumen-penertiban" {...field} />
+                        <Input 
+                          className="text-black" 
+                          type="file" 
+                          name ={field.name} 
+                          placeholder="https://balmonjambi/folder/dokumen-penertiban"
+                          onChange={(e : React.ChangeEvent<HTMLInputElement>) => {
+                            const file = e.target.files?.[0];
+                            field.onChange(file)
+                          }} 
+                        />
                       </FormControl>
                       <FormMessage className="text-white" />
                     </FormItem>
@@ -231,6 +255,11 @@ export function DocumentInputForm() {
                         <select 
                           id="service"
                           {...field}
+                          onChange={(e : React.ChangeEvent<HTMLSelectElement>) => {
+                            const value = e.target.value;
+                            field.onChange(value);
+                            setService(e.target.value);
+                          }} 
                           className="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm
                                   focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
                                     aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
@@ -296,7 +325,7 @@ export function DocumentInputForm() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit">Submit</Button>
+                <Button type="submit" className="mt-[1rem]">Submit</Button>
               </form>
             </Form>
           </div>

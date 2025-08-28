@@ -38,18 +38,18 @@ const Service = () => {
     
     useEffect(() => {
         const fetchClient = async() => {
-        const {data, error} = await supabase.from("client_summary")
-        .select("*")
-        .eq("dinas_frekuensi", service)
+            const {data, error} = await supabase.from("client_summary")
+            .select("*")
+            .eq("dinas_frekuensi", service)
 
-        if(error) console.log("error : ", error)
-        else {
-            const formattedData = data.map((item) => ({
-                ...item,
-                tanggal_terakhir_berkas : formatDate(item.tanggal_terakhir_berkas)
-            }));
-            setClient(formattedData);
-        }
+            if(error) console.log("error : ", error)
+            else {
+                const formattedData = data.map((item) => ({
+                    ...item,
+                    tanggal_terakhir_berkas : formatDate(item.tanggal_terakhir_berkas)
+                }));
+                setClient(formattedData);
+            }
         }
         fetchClient();
         // Subscribe ke table Client

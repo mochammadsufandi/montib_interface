@@ -1,14 +1,12 @@
 import { Button } from "@/components/ui/button"
 import {
   Card,
-  CardAction,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import Image from "next/image"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -21,6 +19,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import supabase from "@/lib/db"
+import { useRouter } from "next/router"
+import Toast from "@/components/layout/dialog-components/toast"
+import { useToast } from "@/context/toastContext"
 
 const userSchema = z.object({
   email : z.email().min(5, {
@@ -32,6 +34,8 @@ const userSchema = z.object({
 })
 
 const Login = () => {
+    const router = useRouter();
+    const {message,duration,onCloseToast,type, setDuration, setIsOpenToast, setMessage, setType} = useToast();
 
     const form = useForm<z.infer<typeof userSchema>>({
         resolver: zodResolver(userSchema),
@@ -42,11 +46,22 @@ const Login = () => {
     })
 
     async function onSubmit(values: z.infer<typeof userSchema>) {
-        console.log(values)
+        const {data, error} = await supabase.auth.signInWithPassword({
+            ...values
+        });
+        if(error) {
+            setIsOpenToast();
+            setDuration(2000);
+            setType("error");
+            setMessage(error.message);
+        } else {
+            console.log(data);
+            router.push("/");
+        }
     }
 
   return (
-        <div className="w-full h-full bg-blue-300 bg-cover" style={{ backgroundImage: "url('/BG-Login.jpg')" }}>
+        <div className="w-full  bg-blue-300 h-screen bg-cover bg-center" style={{ backgroundImage: "url('/Los-Dol.jpg')" }}>
             <div className="flex flex-col items-center justify-center h-full">
             <Card className="w-full max-w-md bg-white/60">
                 <div className="flex flex-row gap-[1rem] items-center justify-center">
@@ -111,7 +126,7 @@ const Login = () => {
                 </CardContent>
             </Card>
             </div>
-            
+            <Toast duration={duration} type={type} message={message} onClose={onCloseToast}/>
         </div>
   )
 }

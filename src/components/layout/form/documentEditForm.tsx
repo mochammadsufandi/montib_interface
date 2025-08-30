@@ -18,11 +18,14 @@ import Image from "next/image"
 import React, { useEffect, useState } from "react"
 import { useEditDocument } from "@/context/documentContext"
 import supabase from "@/lib/db"
+import { useToast } from "@/context/toastContext"
 
 type DocumentInput = {
   nomor_surat : string,
   nama_dokumen : string,
+  bagian_pengendalian? : string,
   jenis_dokumen : string,
+  dinas_frekuensi? : string,
   url? : string,
   tanggal_dibuat : Date,
   clientId : number,
@@ -68,18 +71,81 @@ export function DocumentEditForm() {
   const [tanggalSurat, setTanggalSurat] = useState<string>("");
   const [clients, setClients] = useState<ClientType[]>([]);
   const [service, setService] = useState("");
+  const {setIsOpenToast, setDuration, setMessage, setType} = useToast();
+
+    async function uploadFile(file:File) {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `documents/${fileName}`;
+      const {error} = await supabase.storage.from("Document").upload(filePath, file);
+      if(error) {
+        console.log(error);
+        setIsOpenToast();
+        setDuration(2000);
+        setMessage(error.message);
+        setType("error")
+      }
+      return filePath;
+  }
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof documentFormSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    const data : DocumentInput = {
+    const crudeParams : DocumentInput = {
       ...values,
       clientId : +values.clientId,
       nomor_surat : `B-${values.nomor_surat}/Balmon.15/SP.03.${values.bagian_pengendalian}${tanggalSurat}`,
       tanggal_dibuat : new Date(values.tanggal_dibuat)
     }
-    console.log(data);
+    const {bagian_pengendalian, dinas_frekuensi, file, ...documentParams} = crudeParams;
+    console.log(bagian_pengendalian,dinas_frekuensi,file)
+    let filePath : string | undefined = "";
+    let publicUrl : string = ""
+    if(crudeParams.file) {
+      const oldPath = selectedRowDocument?.url.split("/Document/")[1] as string;
+      const {error} = await supabase.storage.from("Document").remove([oldPath])
+      if(error) {
+        console.log(error)
+        setIsOpenToast();
+        setDuration(2000);
+        setMessage(error.message);
+        setType("error")
+      }
+      filePath = await uploadFile(crudeParams.file);  
+      const {data} = supabase.storage.from("Document").getPublicUrl(filePath as string);
+      publicUrl = data.publicUrl;
+    } else {
+      publicUrl = documentParams.url as string;
+    }
+
+    const {error} = await supabase.from("Documents").update({
+    ...documentParams,
+    url : publicUrl
+    }).eq("id", selectedRowDocument?.document_id);
+    if(error) {
+        console.log(error);
+        setIsOpenToast();
+        setDuration(2000);
+        setMessage(error.message);
+        setType("error")
+    } else {
+        console.log(error);
+        setIsOpenToast();
+        setDuration(2000);
+        setMessage(`Edit Document ${documentParams.nama_dokumen} Berhasil` );
+        setType("success")
+        form.reset({
+          nama_dokumen : "",
+          nomor_surat : "",
+          bagian_pengendalian : "",
+          jenis_dokumen : "",
+          file : undefined,
+          dinas_frekuensi : "",
+          clientId : "",
+          tanggal_dibuat : ""
+        })
+    }
 
   }
 
@@ -165,7 +231,7 @@ export function DocumentEditForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Input placeholder="545a" {...field} type="number" min={0} className="w-[5rem]"/>
+                          <Input placeholder="545a" {...field}  className="w-[5rem]"/>
                         </FormControl>
                       </FormItem>
                     )}

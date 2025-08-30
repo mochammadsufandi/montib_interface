@@ -17,11 +17,14 @@ import { useModal } from "@/context/modalContext"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
 import supabase from "@/lib/db"
+import { useToast } from "@/context/toastContext"
 
 type DocumentInput = {
   nomor_surat : string,
+  bagian_pengendalian? : string,
   nama_dokumen : string,
   jenis_dokumen : string,
+  dinas_frekuensi? : string,
   url? : string,
   tanggal_dibuat : Date,
   clientId : number,
@@ -67,6 +70,7 @@ export function DocumentInputForm() {
   const [tanggalSurat, setTanggalSurat] = useState<string>("");
   const [clients, setClients] = useState<ClientType[]>([]);
   const [service, setService] = useState("");
+  const {setDuration,setMessage,setIsOpenToast,setType} = useToast();
 
 
   async function uploadFile(file:File) {
@@ -76,7 +80,10 @@ export function DocumentInputForm() {
       const {error} = await supabase.storage.from("Document").upload(filePath, file);
       if(error) {
         console.log(error);
-        throw error;
+        setIsOpenToast();
+        setDuration(2000);
+        setMessage(error.message);
+        setType("error")
       }
       return filePath;
   }
@@ -85,14 +92,47 @@ export function DocumentInputForm() {
   async function onSubmit(values: z.infer<typeof documentFormSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    const data : DocumentInput = {
+    const crudeParams : DocumentInput = {
       ...values,
       clientId : +values.clientId,
       nomor_surat : `B-${values.nomor_surat}/Balmon.15/SP.03.${values.bagian_pengendalian}${tanggalSurat}`,
       tanggal_dibuat : new Date(values.tanggal_dibuat)
     }
-    const filePath = await uploadFile(data.file);
-    console.log(filePath)
+    const {bagian_pengendalian, dinas_frekuensi, file, ...documentParams} = crudeParams;
+    console.log(bagian_pengendalian,dinas_frekuensi,file)
+    const filePath = await uploadFile(crudeParams.file);
+    
+    const {data} = supabase.storage.from("Document").getPublicUrl(filePath);
+    const publicUrl = data.publicUrl;
+
+    
+    const {error} = await supabase.from("Documents").insert({
+      ...documentParams,
+      url : publicUrl
+    })
+    if(error) {
+        console.log(error);
+        setIsOpenToast();
+        setDuration(2000);
+        setMessage(error.message);
+        setType("error")
+    } else {
+        console.log(error);
+        setIsOpenToast();
+        setDuration(2000);
+        setMessage(`Tambah Document ${documentParams.nama_dokumen} Berhasil` );
+        setType("success")
+        form.reset({
+          nama_dokumen : "",
+          nomor_surat : "",
+          bagian_pengendalian : "",
+          jenis_dokumen : "",
+          file : undefined,
+          dinas_frekuensi : "",
+          clientId : "",
+          tanggal_dibuat : ""
+        })
+    }
   }
 
   useEffect(() => {
@@ -214,6 +254,7 @@ export function DocumentInputForm() {
                           <option>BA Penghentian Pemancaran SFR</option>
                           <option>BA Klarifikasi Kesanggupan Pemenuhan PP</option>
                           <option>BA Pengamanan APT</option>
+                          <option>BA Serah Terima APT</option>
                           <option>BA Pemeriksaan (Remote Site)</option>
                           <option>BA Pemeriksaan (Open Shelter)</option>
                           <option>Surat Pemberitahuan Penetapan Denda (SPPD)</option>

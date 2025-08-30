@@ -22,12 +22,12 @@ export const clientColumns: ColumnDef<Client>[] = [
     header: ({ column }) => {
       return (
         <div className="flex flex-row items-center">
-          <button
+          <button className="flex flex-row items-center"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Nama Perusahaan
+            Nama Perusahaan 
+            <ArrowUpDown className="ml-2 h-4 w-4" />
           </button>
-          <ArrowUpDown className="ml-2 h-4 w-4" />
         </div>
       )
     },
@@ -37,12 +37,12 @@ export const clientColumns: ColumnDef<Client>[] = [
     header: ({ column }) => {
       return (
         <div className="flex flex-row items-center">
-          <button
+          <button className="flex flex-row items-center"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Alamat
-          </button>
           <ArrowUpDown className="ml-2 h-4 w-4" />
+          </button>
         </div>
       )
     },
@@ -52,12 +52,12 @@ export const clientColumns: ColumnDef<Client>[] = [
     header: ({ column }) => {
       return (
         <div className="flex flex-row items-center">
-          <button
+          <button className="flex flex-row items-center"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Jumlah Berkas
-          </button>
           <ArrowUpDown className="ml-2 h-4 w-4" />
+          </button>
         </div>
       )
     },
@@ -67,12 +67,12 @@ export const clientColumns: ColumnDef<Client>[] = [
     header: ({ column }) => {
       return (
         <div className="flex flex-row items-center">
-          <button
+          <button className="flex flex-row items-center"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Tanggal Terakhir Berkas
-          </button>
           <ArrowUpDown className="ml-2 h-4 w-4" />
+          </button>
         </div>
       )
     },

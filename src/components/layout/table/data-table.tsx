@@ -175,7 +175,7 @@ export function DataTable<TData, TValue>({
                   <TableCell key={cell.id} className="w-[30rem] max-w-[30rem] whitespace-normal break-words">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     { cell.column.id === "action" ? (
-                      <>
+                      <div className="flex flex-wrap justify-center gap-1">
                           <Button className="bg-white max-w-fit max-h-fit" variant={"outline"}
                             onClick={() => {
                               openModalEditDocument()
@@ -192,7 +192,12 @@ export function DataTable<TData, TValue>({
                           >
                             <Image src={"/deleteIcon.svg"} alt="delete" width={25} height={25}></Image>
                           </Button>
-                        </>
+                          <Button className="bg-white" variant={"outline"}
+                            onClick={() => window.open((row.original as DocumentDataType).url)}
+                          >
+                            <Image src={"/detailsIcon.svg"} alt="delete" width={25} height={25}></Image>
+                          </Button>
+                        </div>
                     ) : (
                       ""
                     )}

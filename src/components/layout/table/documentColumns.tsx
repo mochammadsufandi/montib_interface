@@ -25,12 +25,12 @@ export const DocumentColumns: ColumnDef<Document>[] = [
     header: ({ column }) => {
       return (
         <div className="flex flex-row items-center">
-          <button
+          <button className="flex flex-row items-center"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Nama Dokumen
-          </button>
           <ArrowUpDown className="ml-2 h-4 w-4" />
+          </button>
         </div>
       )
     },
@@ -40,12 +40,12 @@ export const DocumentColumns: ColumnDef<Document>[] = [
     header: ({ column }) => {
       return (
         <div className="flex flex-row items-center">
-          <button
+          <button className="flex flex-row items-center"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Nomor Surat
-          </button>
           <ArrowUpDown className="ml-2 h-4 w-4" />
+          </button>
         </div>
       )
     },
@@ -55,12 +55,12 @@ export const DocumentColumns: ColumnDef<Document>[] = [
     header: ({ column }) => {
       return (
         <div className="flex flex-row items-center">
-          <button
+          <button className="flex flex-row items-center"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Jenis Dokumen
-          </button>
           <ArrowUpDown className="ml-2 h-4 w-4" />
+          </button>
         </div>
       )
     },
@@ -70,12 +70,12 @@ export const DocumentColumns: ColumnDef<Document>[] = [
     header: ({ column }) => {
       return (
         <div className="flex flex-row items-center">
-          <button
+          <button className="flex flex-row items-center"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
            Tanggal Dibuat
-          </button>
           <ArrowUpDown className="ml-2 h-4 w-4" />
+          </button>
         </div>
       )
     },
@@ -85,12 +85,12 @@ export const DocumentColumns: ColumnDef<Document>[] = [
     header: ({ column }) => {
       return (
         <div className="flex flex-row items-center">
-          <button
+          <button className="flex flex-row items-center"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
            Tanggal Upload
-          </button>
           <ArrowUpDown className="ml-2 h-4 w-4" />
+          </button>
         </div>
       )
     },

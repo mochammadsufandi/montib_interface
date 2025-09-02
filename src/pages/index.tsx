@@ -28,14 +28,14 @@ const Home = () => {
   const chartConfig1 = {
     client: {
       label: "Client",
-      color: "#2563eb",
+      color: "#EDA35A",
     },
     dokumen : {
       label: "Dokumen",
-      color: "#60a5fa",
+      color: "#8AA624",
     },
     tahun : {
-      label: "Dokumen",
+      label: "Tahun",
       color: "#60a5fa",
     },
 } satisfies ChartConfig
@@ -43,11 +43,11 @@ const Home = () => {
   const chartConfig2 = {
     jumlah_client: {
       label: "Client",
-      color: "#fdf6db",
+      color: "#fcc61d",
     },
     jumlah_dokumen : {
       label: "Dokumen",
-      color: "#d4eaf8",
+      color: "#f5babb",
     },
     dinas_frekuensi: {
       label: "Service",
@@ -65,14 +65,13 @@ const Home = () => {
         console.log(error);
       } else {
         const hasil = tahunList.map((tahun) => {
-          const found = data.find((d) => d.tahun === tahun)
+          const found = data.find((d : DashboardDataItem1) => d.tahun === tahun)
             return {
               tahun,
               client: found?.jumlah_client as number?? 0,
               dokumen: found?.jumlah_dokumen as number?? 0,
           }
         })
-        console.log(hasil)
         setFetchData1(hasil)
       }
     }
@@ -92,7 +91,7 @@ const Home = () => {
 
 
   return (
-    <div className="w-full flex flex-col relative">
+    <div className="w-full h-full flex flex-col relative bg-center bg-cover" style={{ backgroundImage: "url('/Los-Dol.jpg')" }}>
       <Header query="Home"/>
       <div className="flex flex-row flex-wrap gap-5 items-center justify-center w-full h-full mt-[10rem]">  
         <DashboardChart chartData={fetchData1} chartConfig={chartConfig1} type="tahun"/>

@@ -29,7 +29,7 @@ export default function App({ Component, pageProps }: AppProps) {
             <DocumentProvider>
               <ToastProvider>
                 { showSideBar && <AppSideBar/>}
-                <main className="w-full bg-center bg-cover" style={{ backgroundImage: "url('/Los-Dol.jpg')" }}>
+                <main className="w-full">
                   <Component {...pageProps} />
                 </main>
                 <ClientInputForm/>

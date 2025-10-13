@@ -56,11 +56,19 @@ const Home = () => {
 } satisfies ChartConfig
   
   useEffect(() => {
-    const tahunList = [2021, 2022, 2023, 2024, 2025]
+    const tahunNow = new Date().getFullYear();
+    const limaTahunTerakhir = (tahun : number) => {
+      const arrayTahun = [];
+      for(let i = 4; i >= 0; i--) {
+        arrayTahun.push(tahun - i);
+      }
+      return arrayTahun;
+    }
+    const tahunList = limaTahunTerakhir(tahunNow);
     const fetchDashboard1 = async() => {
       const {data, error} = await supabase.from("statistik_client_dokumen_tahunan")
           .select("*")
-          .in("tahun", [2025,2024,2023]);
+          .in("tahun", tahunList);
       if(error) {
         console.log(error);
       } else {
@@ -72,7 +80,8 @@ const Home = () => {
               dokumen: found?.jumlah_dokumen as number?? 0,
           }
         })
-        setFetchData1(hasil)
+        setFetchData1(hasil);
+        console.log(hasil);
       }
     }
     const fetchDashboard2 = async() => {

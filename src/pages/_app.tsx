@@ -12,8 +12,15 @@ import { DocumentProvider } from "@/context/documentContext";
 import DeleteModalClient from "@/components/layout/form/deleteModalClient";
 import DeleteModalDocument from "@/components/layout/form/deleteModalDocument";
 import { ToastProvider } from "@/context/toastContext";
+import { useRouter } from "next/router";
+import useAuth from "@/lib/auth";
 
 export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter();
+  const noSideBarRoutes = ["/login"];
+  const showSideBar = !noSideBarRoutes.includes(router.pathname);
+  useAuth();
+
   return (
     <div className="flex">
       <SidebarProvider>
@@ -21,7 +28,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <ClientProvider>
             <DocumentProvider>
               <ToastProvider>
-                <AppSideBar/>
+                { showSideBar && <AppSideBar/>}
                 <main className="w-full">
                   <Component {...pageProps} />
                 </main>

@@ -17,14 +17,26 @@ import { useModal } from "@/context/modalContext"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
 import { useEditDocument } from "@/context/documentContext"
+import supabase from "@/lib/db"
+import { useToast } from "@/context/toastContext"
 
 type DocumentInput = {
   nomor_surat : string,
   nama_dokumen : string,
+  bagian_pengendalian? : string,
   jenis_dokumen : string,
-  url : string,
+  dinas_frekuensi? : string,
+  url? : string,
   tanggal_dibuat : Date,
   clientId : number,
+  file? : File
+}
+
+type ClientType = {
+    id : string,
+    nama_client : string,
+    alamat_client : string,
+    dinas_frekuensi : string,
 }
 
 
@@ -37,10 +49,10 @@ const documentFormSchema = z.object({
     message : "alamat minimal 8 karakter"
   }),
   jenis_dokumen: z.string(),
-  url: z.string(),
-  dinas_frekuensi: z.string(),
+  dinas_frekuensi: z.string().optional(),
   tanggal_dibuat: z.string(),
-  clientId : z.number()
+  clientId : z.string(),
+  file : z.file().optional(),
 })
 
 export function DocumentEditForm() {
@@ -51,43 +63,90 @@ export function DocumentEditForm() {
       bagian_pengendalian:"",
       nama_dokumen: "",
       jenis_dokumen: "",
-      url: "",
     },
   })
 
   const {isOpenEditDocument, closeModalEditDocument} = useModal();
   const {selectedRowDocument} = useEditDocument()
   const [tanggalSurat, setTanggalSurat] = useState<string>("");
-  const clients = [
-    {
-      id : 1,
-      nama_client : "Radio Eldity, PT"
-    },
-    {
-      id : 2,
-      nama_client : "Singoedan Media Network, PT"
-    },
-    {
-      id : 3,
-      nama_client : "PT Telekomunikasi Indonesia"
-    },
-    {
-      id : 4,
-      nama_client : "PT XL Smart Telecom Sejahtera"
-    },
-  ]
+  const [clients, setClients] = useState<ClientType[]>([]);
+  const [service, setService] = useState("");
+  const {setIsOpenToast, setDuration, setMessage, setType} = useToast();
+
+    async function uploadFile(file:File) {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `documents/${fileName}`;
+      const {error} = await supabase.storage.from("Document").upload(filePath, file);
+      if(error) {
+        console.log(error);
+        setIsOpenToast();
+        setDuration(2000);
+        setMessage(error.message);
+        setType("error")
+      }
+      return filePath;
+  }
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof documentFormSchema>) {
+  async function onSubmit(values: z.infer<typeof documentFormSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    const data : DocumentInput = {
+    const crudeParams : DocumentInput = {
       ...values,
       clientId : +values.clientId,
       nomor_surat : `B-${values.nomor_surat}/Balmon.15/SP.03.${values.bagian_pengendalian}${tanggalSurat}`,
       tanggal_dibuat : new Date(values.tanggal_dibuat)
     }
-    console.log(data)
+    const {bagian_pengendalian, dinas_frekuensi, file, ...documentParams} = crudeParams;
+    console.log(bagian_pengendalian,dinas_frekuensi,file)
+    let filePath : string | undefined = "";
+    let publicUrl : string = ""
+    if(crudeParams.file) {
+      const oldPath = selectedRowDocument?.url.split("/Document/")[1] as string;
+      const {error} = await supabase.storage.from("Document").remove([oldPath])
+      if(error) {
+        console.log(error)
+        setIsOpenToast();
+        setDuration(2000);
+        setMessage(error.message);
+        setType("error")
+      }
+      filePath = await uploadFile(crudeParams.file);  
+      const {data} = supabase.storage.from("Document").getPublicUrl(filePath as string);
+      publicUrl = data.publicUrl;
+    } else {
+      publicUrl = documentParams.url as string;
+    }
+
+    const {error} = await supabase.from("Documents").update({
+    ...documentParams,
+    url : publicUrl
+    }).eq("id", selectedRowDocument?.document_id);
+    if(error) {
+        console.log(error);
+        setIsOpenToast();
+        setDuration(2000);
+        setMessage(error.message);
+        setType("error")
+    } else {
+        console.log(error);
+        setIsOpenToast();
+        setDuration(2000);
+        setMessage(`Edit Document ${documentParams.nama_dokumen} Berhasil` );
+        setType("success")
+        form.reset({
+          nama_dokumen : "",
+          nomor_surat : "",
+          bagian_pengendalian : "",
+          jenis_dokumen : "",
+          file : undefined,
+          dinas_frekuensi : "",
+          clientId : "",
+          tanggal_dibuat : ""
+        })
+    }
+
   }
 
   useEffect(() => {
@@ -96,23 +155,49 @@ export function DocumentEditForm() {
     } else {
       document.body.style.overflow = "auto"; // aktifkan scroll
     }
+    console.log(selectedRowDocument)
     if(selectedRowDocument) {
-      console.log(selectedRowDocument.tanggal_dibuat.toLocaleDateString())
-      // const
+      const arrayDate = selectedRowDocument.tanggal_dibuat.toLocaleDateString().split("/");
+      const day = arrayDate[0].padStart(2,"0");
+      const month = arrayDate[1].padStart(2,"0");
+      const year = arrayDate[2];
+      const formatDate = `${year}-${day}-${month}`;
       form.reset({
         nomor_surat : selectedRowDocument.nomor_surat.split("/")[0].split("-")[1],
         bagian_pengendalian : selectedRowDocument.nomor_surat.split("/")[2].split(".")[2],
         nama_dokumen : selectedRowDocument.nama_dokumen,
         jenis_dokumen : selectedRowDocument.jenis_dokumen,
-        clientId : +selectedRowDocument.clientId,
-        tanggal_dibuat : selectedRowDocument.tanggal_dibuat.toISOString().split(":")[0]
+        clientId : selectedRowDocument.clientId,
+        tanggal_dibuat : formatDate
       })
+      const date = new Date(selectedRowDocument.tanggal_dibuat.toLocaleDateString())
+
+      if(!isNaN(date.getTime())) {
+        const month = String(date.getMonth() + 1).padStart(2,"0");
+        const year = date.getFullYear();
+        setTanggalSurat(`/${month}/${year}`)
+      }
     }
+
+      const fetchClient = async() => {
+      const {data,error} = await supabase.from("Client").select("*").eq("dinas_frekuensi", service)
+        if(error) {
+          console.log(error)
+        } else {
+          const formattedData = data.map((item) => ({
+                    ...item,
+                    id : (item.id as number).toString(),    
+                    tanggal_dibuat : new Date(item.tanggal_dibuat),
+                }));
+          setClients(formattedData);
+        }
+    }
+    fetchClient();
 
     return () => {
       document.body.style.overflow = "auto"; // jaga-jaga kalau komponen unmount
     };
-  }, [isOpenEditDocument,selectedRowDocument,form]);
+  }, [isOpenEditDocument,selectedRowDocument,form, service, ]);
 
   if (!isOpenEditDocument) return null;
 
@@ -146,7 +231,7 @@ export function DocumentEditForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
-                          <Input placeholder="545a" {...field} type="number" min={0} className="w-[5rem]"/>
+                          <Input placeholder="545a" {...field}  className="w-[5rem]"/>
                         </FormControl>
                       </FormItem>
                     )}
@@ -220,70 +305,85 @@ export function DocumentEditForm() {
                     </FormItem>
                   )}
                 />
-                <FormField
+               <FormField
                   control={form.control}
-                  name="url"
+                  name="file"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[1rem]">URL</FormLabel>
+                      <FormLabel className="text-[1rem]">File</FormLabel>
                       <FormControl>
-                        <Input className="text-black" placeholder="https://balmonjambi/folder/dokumen-penertiban" {...field} />
+                        <Input 
+                          className="text-black" 
+                          type="file" 
+                          name ={field.name} 
+                          required={false}
+                          placeholder="https://balmonjambi/folder/dokumen-penertiban"
+                          onChange={(e : React.ChangeEvent<HTMLInputElement>) => {
+                            const file = e.target.files?.[0];
+                            field.onChange(file)
+                          }} 
+                        />
                       </FormControl>
                       <FormMessage className="text-white" />
                     </FormItem>
                   )}
                 />
                 <FormField
-                  control={form.control}
-                  name="dinas_frekuensi"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[1rem]">Dinas Frekuensi</FormLabel>
-                      <FormControl>
-                        <select 
-                          id="service"
-                          {...field}
-                          className="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm
-                                  focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
-                                    aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
-                        >
-                          <option>Select Option</option>
-                          <option>Standard</option>
-                          <option>Maritime</option>
-                          <option>FM/AM/DVB-T</option>
-                          <option>Amatir</option>
-                          <option>Trunking</option>
-                          <option>Point to Point</option>
-                          <option>Free to Air/Unlicensed</option>
-                        </select>
-                      </FormControl>
-                      <FormMessage className="text-white"/>
-                    </FormItem>
-                  )}
+                    control={form.control}
+                    name="dinas_frekuensi"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[1rem]">Dinas Frekuensi</FormLabel>
+                        <FormControl>
+                          <select 
+                            id="service"
+                            {...field}
+                            onChange={(e : React.ChangeEvent<HTMLSelectElement>) => {
+                              const value = e.target.value;
+                              field.onChange(value);
+                              setService(e.target.value);
+                            }} 
+                            className="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm
+                                    focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
+                                      aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                          >
+                            <option>Select Option</option>
+                            <option>Standard</option>
+                            <option>Maritime</option>
+                            <option>FM/AM/DVB-T</option>
+                            <option>Amatir</option>
+                            <option>Trunking</option>
+                            <option>Point to Point</option>
+                            <option>Free to Air/Unlicensed</option>
+                          </select>
+                        </FormControl>
+                        <FormMessage className="text-white"/>
+                      </FormItem>
+                    )}
                 />
                 <FormField
-                  control={form.control}
-                  name="clientId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[1rem]">ClientId</FormLabel>
-                      <FormControl>
-                        <select 
-                          id="service"
-                          {...field}
-                          className="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm
-                                  focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
-                                    aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
-                        > <option>Select Option</option>
-                        {clients.map((client) => (
-                          <option key={client.id} value={client.id}>{client.nama_client}</option>
-                        ))
-                        }
-                        </select>
-                      </FormControl>
-                      <FormMessage className="text-white" />
-                    </FormItem>
-                  )}
+                    control={form.control}
+                    name="clientId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[1rem]">ClientId</FormLabel>
+                        <FormControl>
+                          <select 
+                            id="service"
+                            {...field}
+                            className="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm
+                                    focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
+                                      aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                          > <option>Select Option</option>
+                          {clients.map((client) => (
+                            <option key={client.id} value={client.id}>{client.nama_client}</option>
+                          ))
+                          }
+                          </select>
+                        </FormControl>
+                        <FormMessage className="text-white" />
+                      </FormItem>
+                    )}
                 />
                 <FormField
                   control={form.control}

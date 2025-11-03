@@ -24,6 +24,8 @@ export type ClientDataType = {
 const Service = () => {
 
     const [client, setClient] = useState<ClientDataType[]>([]);
+    const [fetchedClient, setFetchedClient] = useState<ClientDataType[]>([]);
+    const [searchTerm, setSearchTerm] = useState("");
     const {service} = useEditClient();
 
     const formatDate = (dateString: string | null) => {
@@ -38,18 +40,19 @@ const Service = () => {
     
     useEffect(() => {
         const fetchClient = async() => {
-        const {data, error} = await supabase.from("client_summary")
-        .select("*")
-        .eq("dinas_frekuensi", service)
+            const {data, error} = await supabase.from("client_summary")
+            .select("*")
+            .eq("dinas_frekuensi", service)
 
-        if(error) console.log("error : ", error)
-        else {
-            const formattedData = data.map((item) => ({
-                ...item,
-                tanggal_terakhir_berkas : formatDate(item.tanggal_terakhir_berkas)
-            }));
-            setClient(formattedData);
-        }
+            if(error) console.log("error : ", error)
+            else {
+                const formattedData = data.map((item) => ({
+                    ...item,
+                    tanggal_terakhir_berkas : formatDate(item.tanggal_terakhir_berkas)
+                }));
+                setFetchedClient(formattedData);
+                setClient(formattedData);
+            }
         }
         fetchClient();
         // Subscribe ke table Client
@@ -62,23 +65,18 @@ const Service = () => {
             console.log("Perubahan data:", payload);
 
         if (payload.eventType === "UPDATE") {
-            // kondisi EDIT
-            if ((payload.new as ClientDataType)?.dinas_frekuensi === service) {
-            fetchClient(); // panggil ulang data dari BE
-            }
+            fetchClient();
         }
 
         if (payload.eventType === "DELETE") {
             // kondisi DELETE
-            console.log(payload.old.id);
-            setClient((prev) => prev.filter((c) => c.client_id !== payload.old.id));
-            // fetchClient();
+            fetchClient();
         }
 
         if (payload.eventType === "INSERT") {
             // kalau mau handle INSERT juga
             if ((payload.new as ClientDataType)?.dinas_frekuensi === service) {
-            fetchClient();
+                fetchClient();
             }
         }
         })
@@ -89,6 +87,22 @@ const Service = () => {
         };
     }, [service])
 
+    useEffect(() => {
+        if (!searchTerm) {
+            setClient(fetchedClient);
+        return;
+    }
+
+    const filtered = fetchedClient.filter((client) =>
+      Object.values(client).some((value) =>
+        String(value).toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+
+    setClient(filtered);
+    },[searchTerm, fetchedClient])
+
+
 
     const {message,duration,onCloseToast,type} = useToast();
     
@@ -96,7 +110,9 @@ const Service = () => {
         <div className="">
             <Header query="Service"/>
             <div className="flex flex-col items-center pt-[7rem]">
-                <Input type="text" className="w-[20rem] h-[2.8rem] mt-[2rem] text-center bg-gray-200 border-black border-[2px] " placeholder="Search"/>
+                <Input type="text" className="w-[20rem] h-[2.8rem] mt-[2rem] text-center bg-gray-200 border-black border-[2px] " placeholder="Search"
+                    onChange={(e:React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                />
                 <DataTable columns={clientColumns} data={client} type="client" />
                 <Toast message={message} duration={duration} onClose={onCloseToast} type={type}/>
             </div>

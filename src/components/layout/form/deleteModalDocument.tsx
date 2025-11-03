@@ -1,11 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { useEditDocument } from "@/context/documentContext";
 import { useModal } from "@/context/modalContext";
+import { useToast } from "@/context/toastContext";
+import supabase from "@/lib/db";
 import { useEffect } from "react";
 
 const DeleteModalDocument = () => {
     const {isOpenDeleteDocument, closeModalDeleteDocument} = useModal();
     const {selectedRowDocument} = useEditDocument();
+    const {setDuration,setIsOpenToast,setMessage,setType} = useToast();
 
       
     useEffect(() => {
@@ -22,7 +25,38 @@ const DeleteModalDocument = () => {
       }, [isOpenDeleteDocument]);
     
       if (!isOpenDeleteDocument) return null;
-    
+
+    const deleteFile = async() => {
+        const filePath = selectedRowDocument?.url.split("/Document/")[1] as string;
+        const {error} = await supabase.storage.from("Document").remove([filePath])
+         if(error) {
+            console.log(error)
+            setIsOpenToast();
+            setDuration(2000);
+            setMessage(error.message);
+            setType("error")
+            throw(error);
+        }
+    }   
+
+    const deleteClient = async() => {
+        try {
+            await deleteFile();
+
+            const {error} = await supabase.from("Documents").delete().eq("id", selectedRowDocument?.document_id);
+            setIsOpenToast()
+            if(error) {
+                setMessage(error.details);
+                setType("error");
+            } else {
+                setMessage(`delete client ${selectedRowDocument?.nama_dokumen} berhasil`);
+                setDuration(2000);
+                setType("success");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+      }
 
     return (
         <>  
@@ -37,7 +71,10 @@ const DeleteModalDocument = () => {
                     </h2>
                     <div className="flex flex-row justify-around mt-[3rem]">
                         <Button className="w-[5rem] bg-red-600" variant="destructive"
-                            onClick={closeModalDeleteDocument}
+                            onClick={() => {
+                                closeModalDeleteDocument()
+                                deleteClient();
+                            }}
                         >
                             Iya
                         </Button>

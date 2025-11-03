@@ -53,7 +53,7 @@ export function ClientInputForm() {
     setIsOpenToast();
     if(error) {
       setType("error");
-      setMessage(error.details);
+      setMessage(error.message);
       setDuration(2000);
     } else {
       setType("success");

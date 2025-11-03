@@ -2,6 +2,9 @@ import Image from "next/image"
 import { Dropdown } from "../ui/dropdownManual"
 import { Sidebar, SidebarContent, SidebarGroup, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar"
 import { useModal } from "@/context/modalContext"
+import { Button } from "../ui/button"
+import supabase from "@/lib/db"
+import { useRouter } from "next/router"
 
 const items = [
     {
@@ -26,6 +29,18 @@ const items2 = [
 
 export const AppSideBar = () => {
     const {openModalInputClient, openModalInputDocument} = useModal();
+    const router = useRouter();
+
+    async function Logout() {
+        const { error} = await supabase.auth.signOut();
+        if(error) {
+            console.log(error)
+        }  else {
+            console.log("Berhasil Logout");
+            router.push("/");
+        }   
+    }
+
     return (
         <Sidebar className="w-[25rem] ">
             <div className="flex justify-center items-center gap-3 w border-black border-[3px] h-[9rem] bg-gray-300">
@@ -74,6 +89,9 @@ export const AppSideBar = () => {
                             }
                         </SidebarMenu>
                     </SidebarContent>
+                    <div className="flex items-center justify-center mt-[10rem] px-[2rem]">
+                        <Button className="w-full mx-[2rem]" onClick={Logout}>Logout</Button>
+                    </div>
                 </div>
             <SidebarGroup/>
         </Sidebar>

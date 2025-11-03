@@ -195,12 +195,14 @@ export function DocumentInputForm() {
                                     aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
                         >
                           <option>Select Option</option>
+                          <option>BA Klarifikasi/Verifikasi APT</option>
                           <option>Surat Teguran</option>
                           <option>BA Penghentian Pemancaran SFR</option>
                           <option>BA Klarifikasi Kesanggupan Pemenuhan PP</option>
                           <option>BA Pengamanan APT</option>
-                          <option>BA Pemeriksaan (Remote Site)</option>
-                          <option>BA Pemeriksaan (Open Shelter)</option>
+                          <option>BA Pemeriksaan APT</option>
+                          <option>BA Pemeriksaan Stasiun Radio (Remote Site)</option>
+                          <option>BA Pemeriksaan Stasiun Radio(Open Shelter)</option>
                           <option>Surat Pemberitahuan Penetapan Denda (SPPD)</option>
                         </select>
                       </FormControl>

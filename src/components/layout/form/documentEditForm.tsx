@@ -300,6 +300,7 @@ export function DocumentEditForm() {
                           <option>BA Serah Terima APT</option>
                           <option>BA Pemeriksaan (Remote Site)</option>
                           <option>BA Pemeriksaan (Open Shelter)</option>
+                          <option>Risalah Hasil Pemeriksaan Stasiun Radio</option>
                           <option>BA Pemeriksaan APT</option>
                           <option>Surat Pemberitahuan Penetapan Denda (SPPD)</option>
                         </select>

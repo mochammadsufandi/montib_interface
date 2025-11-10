@@ -150,12 +150,13 @@ export function DocumentInputForm() {
         setClients(data);
       }
     }
+    
     fetchClient();
     
     return () => {
       document.body.style.overflow = "auto"; // jaga-jaga kalau komponen unmount
     };
-  }, [isOpenInputDocument, service]);
+  }, [isOpenInputDocument, service, form]);
 
   if (!isOpenInputDocument) return null;
 
@@ -258,6 +259,7 @@ export function DocumentInputForm() {
                           <option>BA Serah Terima APT</option>
                           <option>BA Pemeriksaan (Remote Site)</option>
                           <option>BA Pemeriksaan (Open Shelter)</option>
+                          <option>BA Pemeriksaan APT</option>
                           <option>Surat Pemberitahuan Penetapan Denda (SPPD)</option>
                         </select>
                       </FormControl>

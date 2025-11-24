@@ -317,6 +317,7 @@ export function DocumentInputForm() {
                           <option>Trunking</option>
                           <option>Point to Point</option>
                           <option>Free to Air/Unlicensed</option>
+                          <option>Toko APT</option>
                         </select>
                       </FormControl>
                       <FormMessage className="text-white"/>

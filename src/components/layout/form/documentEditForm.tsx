@@ -292,6 +292,7 @@ export function DocumentEditForm() {
                                     aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
                         >
                           <option>Select Option</option>
+                          <option>Undangan Klarifikasi</option>
                           <option>BA Klarifikasi/Verifikasi APT</option>
                           <option>Surat Teguran</option>
                           <option>BA Penghentian Pemancaran SFR</option>

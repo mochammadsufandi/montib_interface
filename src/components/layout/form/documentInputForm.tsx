@@ -252,6 +252,7 @@ export function DocumentInputForm() {
                         >
                           <option>Select Option</option>
                           <option>Undangan Klarifikasi</option>
+                          <option>Surat Himbauan</option>
                           <option>BA Klarifikasi/Verifikasi APT</option>
                           <option>Surat Teguran</option>
                           <option>BA Penghentian Pemancaran SFR</option>

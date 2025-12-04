@@ -21,9 +21,12 @@ import supabase from "@/lib/db"
 import { useToast } from "@/context/toastContext"
 
 type DocumentInput = {
+  kode_surat : string,
+  kode_surat2 : string,
   nomor_surat : string,
-  nama_dokumen : string,
   bagian_pengendalian? : string,
+  bagian_pengendalian2? : string,
+  nama_dokumen : string,
   jenis_dokumen : string,
   dinas_frekuensi? : string,
   url? : string,
@@ -41,10 +44,13 @@ type ClientType = {
 
 
 const documentFormSchema = z.object({
+  kode_surat : z.string().min(1),
+  kode_surat2 : z.string().min(1),
   nomor_surat: z.string().min(1, {
     message: "nomor surat minimal 1 karakter",
   }),
   bagian_pengendalian : z.string().min(1),
+  bagian_pengendalian2 : z.string().min(1),
   nama_dokumen: z.string().min(8, {
     message : "alamat minimal 8 karakter"
   }),
@@ -60,7 +66,10 @@ export function DocumentEditForm() {
   const form = useForm<z.infer<typeof documentFormSchema>>({
     resolver: zodResolver(documentFormSchema),
     defaultValues: {
+      kode_surat: "",
+      kode_surat2: "",
       bagian_pengendalian:"",
+      bagian_pengendalian2:"",
       nama_dokumen: "",
       jenis_dokumen: "",
     },
@@ -95,11 +104,12 @@ export function DocumentEditForm() {
     const crudeParams : DocumentInput = {
       ...values,
       clientId : +values.clientId,
-      nomor_surat : `B-${values.nomor_surat}/Balmon.15/SP.03.${values.bagian_pengendalian}${tanggalSurat}`,
+      nomor_surat : values.kode_surat === "-" ? `${values.nomor_surat}/Balmon.15/${values.kode_surat2}.${values.bagian_pengendalian2}.${values.bagian_pengendalian}${tanggalSurat}` 
+      : `${values.kode_surat}-${values.nomor_surat}/Balmon.15/${values.kode_surat2}.${values.bagian_pengendalian2}.${values.bagian_pengendalian}${tanggalSurat}` ,
       tanggal_dibuat : new Date(values.tanggal_dibuat)
     }
-    const {bagian_pengendalian, dinas_frekuensi, file, ...documentParams} = crudeParams;
-    console.log(bagian_pengendalian,dinas_frekuensi,file)
+    const {kode_surat, kode_surat2, bagian_pengendalian, bagian_pengendalian2, dinas_frekuensi, file, ...documentParams} = crudeParams;
+    console.log(kode_surat, kode_surat2, bagian_pengendalian, bagian_pengendalian2, dinas_frekuensi,file)
     let filePath : string | undefined = "";
     let publicUrl : string = ""
     if(crudeParams.file) {
@@ -162,14 +172,32 @@ export function DocumentEditForm() {
       const month = arrayDate[1].padStart(2,"0");
       const year = arrayDate[2];
       const formatDate = `${year}-${day}-${month}`;
-      form.reset({
+      if(selectedRowDocument.nomor_surat.split("/")[0].split("-")[0] === "B") {
+        form.reset({
+        kode_surat : selectedRowDocument.nomor_surat.split("/")[0].split("-")[0],
         nomor_surat : selectedRowDocument.nomor_surat.split("/")[0].split("-")[1],
-        bagian_pengendalian : selectedRowDocument.nomor_surat.split("/")[2].split(".")[2],
+        kode_surat2 : selectedRowDocument.nomor_surat.split("/")[2].split(".")[0],
+        bagian_pengendalian : selectedRowDocument.nomor_surat.split("/")[2].split(".")[1],
+        bagian_pengendalian2 : selectedRowDocument.nomor_surat.split("/")[2].split(".")[2],
         nama_dokumen : selectedRowDocument.nama_dokumen,
         jenis_dokumen : selectedRowDocument.jenis_dokumen,
         clientId : selectedRowDocument.clientId,
         tanggal_dibuat : formatDate
       })
+      } else {
+        console.log(selectedRowDocument.nomor_surat.split("/")[0])
+        form.reset({
+          kode_surat : "-",
+          nomor_surat : selectedRowDocument.nomor_surat.split("/")[0],
+          kode_surat2 : selectedRowDocument.nomor_surat.split("/")[2].split(".")[0],
+          bagian_pengendalian : selectedRowDocument.nomor_surat.split("/")[2].split(".")[1],
+          bagian_pengendalian2 : selectedRowDocument.nomor_surat.split("/")[2].split(".")[2],
+          nama_dokumen : selectedRowDocument.nama_dokumen,
+          jenis_dokumen : selectedRowDocument.jenis_dokumen,
+          clientId : selectedRowDocument.clientId,
+          tanggal_dibuat : formatDate
+        })
+      }
       const date = new Date(selectedRowDocument.tanggal_dibuat.toLocaleDateString())
 
       if(!isNaN(date.getTime())) {
@@ -224,7 +252,27 @@ export function DocumentEditForm() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
                 <h1 className="">Nomor Surat</h1>
                 <div className="flex flex-row justify-baseline items-center gap-x-2">
-                  <h1 className="w-fit h-9 py-1 px-[0.5rem] border rounded-md">B-</h1>
+                  <FormField
+                    control={form.control}
+                    name="kode_surat"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <select 
+                            id="service"
+                            {...field}
+                            className="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-[4rem] min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm
+                                    focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
+                                      aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                          >
+                              <option></option>
+                              <option>-</option>
+                              <option>B</option>
+                          </select>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="nomor_surat"
@@ -237,10 +285,55 @@ export function DocumentEditForm() {
                     )}
                   />
                   <h1 className="w-fit h-9 py-1 px-[0.5rem] border rounded-md">/Balmon.15</h1>
-                  <h1 className="w-fit h-9 py-1 px-[0.5rem] border rounded-md">/SP.03</h1>
+                  <FormField
+                    control={form.control}
+                    name="kode_surat2"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <select 
+                              id="service"
+                              {...field}
+                              className="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-[4rem] min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm
+                                      focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
+                                        aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                            >
+                                <option></option>
+                                <option>SP</option>
+                                <option>KU</option>
+                                <option>KP</option>
+                            </select>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="bagian_pengendalian"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <select 
+                            id="service"
+                            {...field}
+                            className="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-[4rem] min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm
+                                    focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
+                                      aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                          >
+                              <option></option>
+                              <option>01</option>
+                              <option>02</option>
+                              <option>03</option>
+                              <option>04</option>
+                              <option>05</option>
+                          </select>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="bagian_pengendalian2"
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>

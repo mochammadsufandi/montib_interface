@@ -20,8 +20,11 @@ import supabase from "@/lib/db"
 import { useToast } from "@/context/toastContext"
 
 type DocumentInput = {
+  kode_surat? : string,
   nomor_surat : string,
+  kode_surat2? : string,
   bagian_pengendalian? : string,
+  bagian_pengendalian2? : string,
   nama_dokumen : string,
   jenis_dokumen : string,
   dinas_frekuensi? : string,
@@ -39,16 +42,18 @@ type ClientType = {
 
 
 const documentFormSchema = z.object({
+  kode_surat : z.string().min(1),
   nomor_surat: z.string().min(1, {
     message: "nomor surat minimal 1 karakter",
   }),
+  kode_surat2 : z.string().min(1),
   bagian_pengendalian : z.string().min(1),
+  bagian_pengendalian2 : z.string().min(1),
   nama_dokumen: z.string().min(8, {
     message : "alamat minimal 8 karakter"
   }),
   jenis_dokumen: z.string(),
   dinas_frekuensi: z.string(),
-  // url : z.string(),
   tanggal_dibuat: z.string(),
   clientId : z.string(),
   file : z.file()
@@ -59,7 +64,10 @@ export function DocumentInputForm() {
   const form = useForm<z.infer<typeof documentFormSchema>>({
     resolver: zodResolver(documentFormSchema),
     defaultValues: {
+      kode_surat: "",
+      kode_surat2: "",
       bagian_pengendalian:"",
+      bagian_pengendalian2:"",
       nama_dokumen: "",
       jenis_dokumen: "",
       tanggal_dibuat: ""
@@ -95,11 +103,12 @@ export function DocumentInputForm() {
     const crudeParams : DocumentInput = {
       ...values,
       clientId : +values.clientId,
-      nomor_surat : `B-${values.nomor_surat}/Balmon.15/SP.03.${values.bagian_pengendalian}${tanggalSurat}`,
+      nomor_surat : values.kode_surat === "-" ? `${values.nomor_surat}/Balmon.15/${values.kode_surat2}.${values.bagian_pengendalian2}.${values.bagian_pengendalian}${tanggalSurat}` 
+      : `${values.kode_surat}-${values.nomor_surat}/Balmon.15/${values.kode_surat2}.${values.bagian_pengendalian2}.${values.bagian_pengendalian}${tanggalSurat}` ,
       tanggal_dibuat : new Date(values.tanggal_dibuat)
     }
-    const {bagian_pengendalian, dinas_frekuensi, file, ...documentParams} = crudeParams;
-    console.log(bagian_pengendalian,dinas_frekuensi,file)
+    const {kode_surat, kode_surat2, bagian_pengendalian, bagian_pengendalian2, dinas_frekuensi, file, ...documentParams} = crudeParams;
+    console.log(kode_surat, kode_surat2, bagian_pengendalian, bagian_pengendalian2, dinas_frekuensi,file)
     const filePath = await uploadFile(crudeParams.file);
     
     const {data} = supabase.storage.from("Document").getPublicUrl(filePath);
@@ -183,7 +192,27 @@ export function DocumentInputForm() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
                 <h1 className="">Nomor Surat</h1>
                 <div className="flex flex-row justify-baseline items-center gap-x-2">
-                  <h1 className="w-fit h-9 py-1 px-[0.5rem] border rounded-md">B-</h1>
+                  <FormField
+                    control={form.control}
+                    name="kode_surat"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                         <select 
+                            id="service"
+                            {...field}
+                            className="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-[4rem] min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm
+                                    focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
+                                      aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                          >
+                              <option></option>
+                              <option>-</option>
+                              <option>B</option>
+                          </select>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="nomor_surat"
@@ -196,10 +225,55 @@ export function DocumentInputForm() {
                     )}
                   />
                   <h1 className="w-fit h-9 py-1 px-[0.5rem] border rounded-md">/Balmon.15</h1>
-                  <h1 className="w-fit h-9 py-1 px-[0.5rem] border rounded-md">/SP.03</h1>
+                  <FormField
+                  control={form.control}
+                  name="kode_surat2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <select 
+                            id="service"
+                            {...field}
+                            className="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-[4rem] min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm
+                                    focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
+                                      aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                          >
+                              <option></option>
+                              <option>SP</option>
+                              <option>KU</option>
+                              <option>KP</option>
+                          </select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
                   <FormField
                     control={form.control}
                     name="bagian_pengendalian"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <select 
+                            id="service"
+                            {...field}
+                            className="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-[4rem] min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm
+                                    focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
+                                      aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                          >
+                              <option></option>
+                              <option>01</option>
+                              <option>02</option>
+                              <option>03</option>
+                              <option>04</option>
+                              <option>05</option>
+                          </select>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="bagian_pengendalian2"
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>

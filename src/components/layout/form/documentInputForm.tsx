@@ -333,6 +333,7 @@ export function DocumentInputForm() {
                           <option>BA Klarifikasi Kesanggupan Pemenuhan PP</option>
                           <option>BA Pengamanan APT</option>
                           <option>BA Serah Terima APT</option>
+                          <option>BA Pembukaan Segel & Pengembalian APT</option>
                           <option>BA Pemeriksaan (Remote Site)</option>
                           <option>BA Pemeriksaan (Open Shelter)</option>
                           <option>Risalah Hasil Pemeriksaan Stasiun Radio</option>
